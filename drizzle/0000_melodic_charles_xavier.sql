@@ -1,0 +1,20 @@
+CREATE TABLE "restaurants" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"slug" varchar(200) NOT NULL,
+	"cuisine" varchar(50) NOT NULL,
+	"location" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "restaurants_slug_unique" UNIQUE("slug")
+);
+--> statement-breakpoint
+CREATE TABLE "reviews" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"restaurant_id" uuid NOT NULL,
+	"author_name" text NOT NULL,
+	"rating" integer NOT NULL,
+	"body" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_restaurant_id_restaurants_id_fk" FOREIGN KEY ("restaurant_id") REFERENCES "public"."restaurants"("id") ON DELETE cascade ON UPDATE no action;
