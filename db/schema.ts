@@ -42,10 +42,14 @@ export const posts = pgTable("posts", {
 
 export const comments = pgTable("comments", {
   id: uuid("id").defaultRandom().primaryKey(),
+
   postId: uuid("post_id")
     .notNull()
     .references(() => posts.id, { onDelete: "cascade" }),
-  authorName: text("author_name").notNull(),
+
+  userId: text("user_id").notNull(), // Clerk userId (for ownership/auth)
+  authorName: text("author_name").notNull(), // snapshot for display
+
   body: text("body").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
