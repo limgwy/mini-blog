@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, uuid, varchar, integer } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+  integer,
+} from "drizzle-orm/pg-core";
 
 export const restaurants = pgTable("restaurants", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -17,7 +24,28 @@ export const reviews = pgTable("reviews", {
     .references(() => restaurants.id, { onDelete: "cascade" }),
 
   authorName: text("author_name").notNull(),
+  title: text("title").notNull(), // ✅ NEW
   rating: integer("rating").notNull(),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const posts = pgTable("posts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  slug: varchar("slug", { length: 200 }).notNull().unique(),
+  location: text("location"),
+  photoUrl: text("photo_url"),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const comments = pgTable("comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  postId: uuid("post_id")
+    .notNull()
+    .references(() => posts.id, { onDelete: "cascade" }),
+  authorName: text("author_name").notNull(),
   body: text("body").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
