@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { posts, comments } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -9,11 +10,41 @@ import CommentItem from "./CommentItem";
 import Image from "next/image";
 
 type Props = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>; // ✅ your Next.js expects Promise
 };
 
-export default async function BlogPostPage({ params }: Props) {
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
   const { slug } = await params;
+
+  const [post] = await db.select().from(posts).where(eq(posts.slug, slug));
+
+  if (!post) {
+    return {
+      title: "Post not found",
+      description: "This post does not exist.",
+    };
+  }
+
+  const description =
+    (post.content ?? "").replace(/\s+/g, " ").trim().slice(0, 160) ||
+    "Blog post";
+
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      title: post.title,
+      description,
+      images: post.photoUrl ? [post.photoUrl] : undefined,
+    },
+  };
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  const { slug } = await params; // ✅ no await
+
 
   const [post] = await db.select().from(posts).where(eq(posts.slug, slug));
   if (!post) notFound();
