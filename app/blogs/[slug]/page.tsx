@@ -5,18 +5,22 @@ import { eq, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { createComment } from "./actions";
+import { createComment, deletePost } from "./actions";
 import CommentItem from "./CommentItem";
 import Image from "next/image";
+import Link from "next/link";
+import PostMenu from "./PostMenu";
 
 type Props = {
-  params: Promise<{ slug: string }>; // ✅ your Next.js expects Promise
+  params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata(
-  { params }: { params: { slug: string } }
-): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const { slug } = params; // ✅ no await
 
   const [post] = await db.select().from(posts).where(eq(posts.slug, slug));
 
@@ -28,8 +32,7 @@ export async function generateMetadata(
   }
 
   const description =
-    (post.content ?? "").replace(/\s+/g, " ").trim().slice(0, 160) ||
-    "Blog post";
+    (post.content ?? "").replace(/\s+/g, " ").trim().slice(0, 160) || "Blog post";
 
   return {
     title: post.title,
@@ -43,8 +46,7 @@ export async function generateMetadata(
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params; // ✅ no await
-
+  const { slug } = await params;
 
   const [post] = await db.select().from(posts).where(eq(posts.slug, slug));
   if (!post) notFound();
@@ -55,94 +57,118 @@ export default async function BlogPostPage({ params }: Props) {
     .where(eq(comments.postId, post.id))
     .orderBy(desc(comments.createdAt));
 
-  const { userId } = await auth();
+  const { userId } = await auth(); // ✅ no await
+  const isOwner = !!userId && post.authorId === userId;
 
   return (
-    <main className="min-h-screen bg-[#fff2d1] py-10">
-     <div className="mx-auto max-w-3xl px-6 space-y-8">
-    
-    {/* ARTICLE CARD */}
-    <div className="rounded-2xl bg-white p-8 shadow-sm ">
-      <h1 className="text-3xl font-bold">{post.title}</h1>
+    <main className="min-h-screen bg-[#FBF4E6] py-10">
+      <div className="mx-auto max-w-3xl px-6 space-y-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50"
+        >
+          ← Back to Home
+        </Link>
 
-      <p className="mt-2 text-sm text-gray-500">
-        {post.location} • {new Date(post.createdAt).toLocaleDateString()}
-      </p>
+        {/* ✅ ARTICLE CARD WRAPPER (this was missing) */}
+        <div className="rounded-2xl bg-white p-8 shadow-sm">
+          {/* TITLE + KEBAB MENU */}
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-3xl font-bold leading-tight">{post.title}</h1>
 
-      {post.photoUrl && (
-        <div className="relative mt-6 w-full aspect-video overflow-hidden rounded-xl border">
-          <Image
-            src={post.photoUrl}
-            alt={post.title}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-        <article className="prose prose-neutral mt-6 max-w-none">
-          {post.content}
-        </article>
-        {/* COMMENTS */}
-        <section className="mt-12 space-y-6">
-          <h2 className="text-xl font-bold">Comments</h2>
+            {isOwner && (
+              <PostMenu
+                editHref={`/blogs/${slug}/edit`}
+                postId={post.id}
+                slug={slug}
+                deleteAction={deletePost}
+              />
+            )}
+          </div>
 
-          <SignedOut>
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <p className="text-sm text-gray-700">
-                Please sign in to leave a comment.
-              </p>
-              <div className="mt-3">
-                <SignInButton>
-                  <button className="rounded-lg bg-black px-4 py-2 text-white">
-                    Sign in
-                  </button>
-                </SignInButton>
-              </div>
-            </div>
-          </SignedOut>
+          {/* META */}
+          <p className="mt-2 text-sm text-gray-500">
+            {post.location} • {new Date(post.createdAt).toLocaleDateString()}
+          </p>
 
-          <SignedIn>
-            <form
-              action={createComment}
-              className="bg-white space-y-3 rounded-xl border p-4"
-            >
-              <input type="hidden" name="postId" value={post.id} />
-              <input type="hidden" name="slug" value={slug} />
-
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Comment</label>
-                <textarea
-                  name="body"
-                  placeholder="Write your comment..."
-                  className="w-full rounded-lg border px-3 py-2"
-                  rows={4}
-                  required
-                />
-              </div>
-
-              <button className="rounded-lg bg-black px-4 py-2 text-white">
-                Post comment
-              </button>
-            </form>
-          </SignedIn>
-
-          {/* LIST */}
-          {postComments.length === 0 ? (
-            <p className="text-sm text-gray-600">No comments yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {postComments.map((c) => (
-                <CommentItem
-                  key={c.id}
-                  slug={slug}
-                  comment={c}
-                  currentUserId={userId ?? null}
-                />
-              ))}
+          {/* IMAGE */}
+          {post.photoUrl && (
+            <div className="relative mt-6 w-full aspect-video overflow-hidden rounded-xl border">
+              <Image
+                src={post.photoUrl}
+                alt={post.title}
+                fill
+                className="object-cover"
+              />
             </div>
           )}
-        </section>
-      </div>
+
+          {/* CONTENT */}
+          <article className="prose prose-neutral mt-6 max-w-none">
+            {post.content}
+          </article>
+
+          {/* COMMENTS */}
+          <section className="mt-12 space-y-6">
+            <h2 className="text-xl font-bold">Comments</h2>
+
+            <SignedOut>
+              <div className="rounded-xl border bg-white p-5 shadow-sm">
+                <p className="text-sm text-gray-700">
+                  Please sign in to leave a comment.
+                </p>
+                <div className="mt-3">
+                  <SignInButton>
+                    <button className="rounded-lg bg-black px-4 py-2 text-white">
+                      Sign in
+                    </button>
+                  </SignInButton>
+                </div>
+              </div>
+            </SignedOut>
+
+            <SignedIn>
+              <form
+                action={createComment}
+                className="bg-white space-y-3 rounded-xl border p-4"
+              >
+                <input type="hidden" name="postId" value={post.id} />
+                <input type="hidden" name="slug" value={slug} />
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Comment</label>
+                  <textarea
+                    name="body"
+                    placeholder="Write your comment..."
+                    className="w-full rounded-lg border px-3 py-2"
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <button className="rounded-lg bg-black px-4 py-2 text-white">
+                  Post comment
+                </button>
+              </form>
+            </SignedIn>
+
+            {/* COMMENT LIST */}
+            {postComments.length === 0 ? (
+              <p className="text-sm text-gray-600">No comments yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {postComments.map((c) => (
+                  <CommentItem
+                    key={c.id}
+                    slug={slug}
+                    comment={c}
+                    currentUserId={userId ?? null}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </main>
   );

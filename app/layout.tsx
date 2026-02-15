@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import Navbar from "@/components/layout/Navbar";
 
 export const metadata = {
   title: {
@@ -10,7 +10,6 @@ export const metadata = {
   },
   description: "A modern food blog built with Next.js",
 };
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +21,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +30,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <Navbar />
           {children}
         </body>
       </html>

@@ -23,47 +23,48 @@ export default async function HomePage() {
 
   return (
     <main>
-      {/* ================= HERO ================= */}
-      <section className="relative">
-        <div
-          className="h-[60vh] w-full bg-cover bg-center"
-          style={{ backgroundImage: "url('/Food.jpg')" }}
-        />
-        <div className="absolute inset-0 bg-black/10" />
+     {/* ================= HERO ================= */}
+<section className="relative h-[85vh] min-h-[520px]">
+  <div
+    className="absolute inset-0 bg-cover bg-center"
+    style={{ backgroundImage: "url('/Food.jpg')" }}
+  />
+  <div className="absolute inset-0 bg-black/10" />
 
-        <div className="absolute inset-0 flex items-center">
-          <div className="mx-auto w-full max-w-4xl px-6 text-center">
-            <h1
-              className={`${bebas.className} text-[clamp(4rem,12vw,9rem)] leading-none tracking-tight text-white`}
-            >
-              GUSTO
-            </h1>
+  <div className="relative z-10 flex h-full items-center">
+    <div className="mx-auto w-full max-w-4xl px-6 text-center">
+      <h1
+        className={`${bebas.className} text-[clamp(4rem,12vw,9rem)] leading-none tracking-tight text-white`}
+      >
+        GUSTO
+      </h1>
 
-            <p className="mx-auto mt-3 max-w-xl text-white/90">
-              Discover the best eats through honest community reviews.
-            </p>
+      <p className="mx-auto mt-3 max-w-xl text-white/90">
+        Discover the best eats through honest community reviews.
+      </p>
 
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <a
-                href="#blogs"
-                className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-gray-900"
-              >
-                Browse Posts
-              </a>
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <a
+          href="#blogs"
+          className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-gray-900"
+        >
+          Browse Posts
+        </a>
 
-              <a
-                href="#cuisines"
-                className="rounded-xl border border-white/70 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur"
-              >
-                Browse Cuisines
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+        <a
+          href="#cuisines"
+          className="rounded-xl border border-white/70 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur"
+        >
+          Browse Cuisines
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* ================= BLOGS ================= */}
-      <section id="blogs" className="bg-[#f6ebd4] py-16">
+      <section id="blogs" className="bg-[#FBF4E6] py-16">
         <div className="mx-auto max-w-4xl px-50 lg:max-w-6xl 2xl:max-w-7xl">
           {" "}
           <h2 className="text-2xl font-bold">Latest Posts</h2>

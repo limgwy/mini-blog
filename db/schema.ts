@@ -37,8 +37,11 @@ export const posts = pgTable("posts", {
   location: text("location"),
   photoUrl: text("photo_url"),
   content: text("content").notNull(),
+  authorId: text("author_id").notNull(),       // ✅ ownership (Clerk userId)
+  authorName: text("author_name").notNull(),   // ✅ snapshot for display (optional)
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
 
 export const comments = pgTable("comments", {
   id: uuid("id").defaultRandom().primaryKey(),

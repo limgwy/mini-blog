@@ -1,10 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { comments } from "@/db/schema";
+import { comments, posts } from "@/db/schema"; // ✅ add posts
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation"; // ✅ for delete redirect
 
 export async function createComment(formData: FormData) {
   const { userId } = await auth();
@@ -43,8 +44,9 @@ export async function deleteComment(formData: FormData) {
 
   if (!commentId || !slug) throw new Error("Missing commentId or slug.");
 
-  // ✅ only delete if the logged-in user owns the comment
-  await db.delete(comments).where(and(eq(comments.id, commentId), eq(comments.userId, userId)));
+  await db
+    .delete(comments)
+    .where(and(eq(comments.id, commentId), eq(comments.userId, userId)));
 
   revalidatePath(`/blogs/${slug}`);
 }
@@ -60,11 +62,71 @@ export async function updateComment(formData: FormData) {
   if (!commentId || !slug) throw new Error("Missing commentId or slug.");
   if (!body) throw new Error("Comment cannot be empty.");
 
-  // ✅ only update if the logged-in user owns the comment
   await db
     .update(comments)
     .set({ body })
     .where(and(eq(comments.id, commentId), eq(comments.userId, userId)));
 
   revalidatePath(`/blogs/${slug}`);
+}
+
+/* =========================
+   ✅ POSTS: UPDATE + DELETE
+   ========================= */
+
+export async function updatePost(formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("You must be signed in.");
+
+  const postId = String(formData.get("postId") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
+  const photoUrl = String(formData.get("photoUrl") ?? "").trim() || null;
+  const content = String(formData.get("content") ?? "").trim();
+
+  if (!postId || !slug) throw new Error("Missing postId or slug.");
+  if (!title) throw new Error("Title is required.");
+  if (!content) throw new Error("Content is required.");
+
+  const [post] = await db.select().from(posts).where(eq(posts.id, postId));
+  if (!post) throw new Error("Post not found.");
+
+  // ✅ owner-only
+  if (post.authorId !== userId) throw new Error("Not allowed.");
+
+  await db
+    .update(posts)
+    .set({
+      title,
+      location: location || null,
+      photoUrl,
+      content,
+    })
+    .where(eq(posts.id, postId));
+
+  revalidatePath("/blogs");
+  revalidatePath(`/blogs/${slug}`);
+  revalidatePath(`/blogs/${slug}/edit`);
+}
+
+export async function deletePost(formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("You must be signed in.");
+
+  const postId = String(formData.get("postId") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+
+  if (!postId || !slug) throw new Error("Missing postId or slug.");
+
+  const [post] = await db.select().from(posts).where(eq(posts.id, postId));
+  if (!post) throw new Error("Post not found.");
+
+  // ✅ owner-only
+  if (post.authorId !== userId) throw new Error("Not allowed.");
+
+  await db.delete(posts).where(eq(posts.id, postId));
+
+  revalidatePath("/blogs");
+  redirect("/blogs");
 }
