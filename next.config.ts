@@ -9,7 +9,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**.fna.fbcdn.net",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "scontent.xx.fbcdn.net", // common FB CDN
       },
     ],
   },

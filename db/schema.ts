@@ -37,8 +37,8 @@ export const posts = pgTable("posts", {
   location: text("location"),
   photoUrl: text("photo_url"),
   content: text("content").notNull(),
-  authorId: text("author_id").notNull(),       // ✅ ownership (Clerk userId)
-  authorName: text("author_name").notNull(),   // ✅ snapshot for display (optional)
+  authorId: text("author_id").notNull(),      
+  authorName: text("author_name").notNull(),   
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -50,8 +50,8 @@ export const comments = pgTable("comments", {
     .notNull()
     .references(() => posts.id, { onDelete: "cascade" }),
 
-  userId: text("user_id").notNull(), // Clerk userId (for ownership/auth)
-  authorName: text("author_name").notNull(), // snapshot for display
+  userId: text("user_id").notNull(), 
+  authorName: text("author_name").notNull(), 
 
   body: text("body").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

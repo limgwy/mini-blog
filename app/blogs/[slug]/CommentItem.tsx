@@ -24,7 +24,6 @@ export default function CommentItem({ slug, comment, currentUserId }: Props) {
 
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // close menu if you click outside
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!menuRef.current) return;

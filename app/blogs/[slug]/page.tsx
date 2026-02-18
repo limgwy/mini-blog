@@ -18,9 +18,9 @@ type Props = {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = params; // ✅ no await
+  const { slug } = await  params;
 
   const [post] = await db.select().from(posts).where(eq(posts.slug, slug));
 
@@ -57,7 +57,7 @@ export default async function BlogPostPage({ params }: Props) {
     .where(eq(comments.postId, post.id))
     .orderBy(desc(comments.createdAt));
 
-  const { userId } = await auth(); // ✅ no await
+  const { userId } = await auth(); 
   const isOwner = !!userId && post.authorId === userId;
 
   return (
@@ -70,7 +70,7 @@ export default async function BlogPostPage({ params }: Props) {
           ← Back to Home
         </Link>
 
-        {/* ✅ ARTICLE CARD WRAPPER (this was missing) */}
+        {/* ARTICLE CARD WRAPPER  */}
         <div className="rounded-2xl bg-white p-8 shadow-sm">
           {/* TITLE + KEBAB MENU */}
           <div className="flex items-start justify-between gap-4">

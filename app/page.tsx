@@ -12,6 +12,25 @@ export const bebas = Bebas_Neue({
   weight: "400",
 });
 
+const CUISINE_IMAGES: Record<string, string> = {
+  japanese:
+    "https://i.pinimg.com/1200x/fc/a1/8e/fca18e8a24b8dcd0631d0e15aa223458.jpg",
+  korean:
+    "https://i.pinimg.com/1200x/f9/1d/e2/f91de2b485d66f5dc2067d236d09a1a0.jpg",
+  filipino:
+    "https://i.pinimg.com/1200x/46/0f/3e/460f3ebc512bcb68ba2806da0132a475.jpg",
+  chinese:
+    "https://i.pinimg.com/1200x/07/86/de/0786def40feb9c1ba85c7974b54c6a49.jpg",
+  mexican:
+    "https://i.pinimg.com/1200x/12/d6/1a/12d61a3954c621d0108a04f0c48db4bf.jpg",
+  american:
+    "https://i.pinimg.com/1200x/40/fb/bf/40fbbf51818b23c93ef792939991c363.jpg",
+};
+
+function keyifyCuisine(cuisine: string) {
+  return cuisine.trim().toLowerCase();
+}
+
 export default async function HomePage() {
   const allPosts = await db.select().from(posts).orderBy(desc(posts.createdAt));
 
@@ -119,11 +138,6 @@ export default async function HomePage() {
                         {/* META */}
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                          
-                         
-                          <span className="font-medium text-gray-700">
-                            {p.cuisine}
-                          </span>
-
                           {isFeatured && (
                             <span className="ml-auto rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-semibold">
                               Featured
@@ -160,30 +174,74 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ================= CUISINES ================= */}
-      <section id="cuisines" className="py-16">
-        <div className="mx-auto max-w-4xl px-6 lg:max-w-6xl 2xl:max-w-7xl">
-          <h2 className="text-2xl font-bold">Browse by Cuisine</h2>
+    {/* ================= CUISINES ================= */}
+<section id="cuisines" className="bg-[#FBF4E6] py-16">
+  <div className="mx-auto max-w-4xl px-6 lg:max-w-6xl 2xl:max-w-7xl">
+    <div className="flex items-end justify-between gap-4">
+      <div>
+        <h2 className="text-2xl font-bold">Browse by Cuisine</h2>
+        <p className="mt-2 text-gray-700">
+          Pick a cuisine to see restaurants under it.
+        </p>
+      </div>
 
-          <div className="mt-4">
-            {cuisines.length === 0 ? (
-              <p className="text-gray-600">No cuisines yet.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {cuisines.map((cuisine) => (
-                  <Link
-                    key={cuisine}
-                    href={`/cuisines/${encodeURIComponent(cuisine)}`}
-                    className="rounded-xl border bg-white p-6 text-center font-semibold hover:bg-gray-50"
-                  >
-                    {cuisine}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+      
+    </div>
+
+    <div className="mt-6">
+      {cuisines.length === 0 ? (
+        <p className="text-gray-600">No cuisines yet.</p>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {cuisines.map((cuisine) => {
+            const img = CUISINE_IMAGES[keyifyCuisine(cuisine)];
+
+            return (
+              <Link
+                key={cuisine}
+                href={`/cuisines/${encodeURIComponent(cuisine)}`}
+                className="group relative overflow-hidden rounded-3xl border border-black/10 bg-white/60 shadow-sm transition hover:-translate-y-1 hover:shadow-xl focus:outline-none"
+              >
+                <div className="relative h-48 w-full">
+                  {img ? (
+                    <img
+                      src={img}
+                      alt={`${cuisine} cuisine`}
+                      className="block h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-gray-200 to-gray-100" />
+                  )}
+
+                  <div className="absolute inset-0 bg-black/35 transition group-hover:bg-black/45" />
+
+                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                    <h3 className="text-center text-2xl font-bold tracking-tight text-white drop-shadow">
+                      {cuisine}
+                    </h3>
+                  </div>
+
+                
+                </div>
+              </Link>
+            );
+          })}
         </div>
-      </section>
+      )}
+    </div>
+
+    <div className="mt-6 sm:hidden">
+      <Link
+        href="/cuisines"
+        className="inline-flex rounded-xl border border-black/10 bg-white/70 px-4 py-2 text-sm font-semibold hover:bg-white transition"
+      >
+        View all cuisines →
+      </Link>
+    </div>
+  </div>
+</section>
+
     </main>
   );
 }

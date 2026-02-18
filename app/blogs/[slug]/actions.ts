@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { comments, posts } from "@/db/schema"; // ✅ add posts
+import { comments, posts } from "@/db/schema"; 
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation"; // ✅ for delete redirect
+import { redirect } from "next/navigation"; 
 
 export async function createComment(formData: FormData) {
   const { userId } = await auth();
@@ -70,9 +70,7 @@ export async function updateComment(formData: FormData) {
   revalidatePath(`/blogs/${slug}`);
 }
 
-/* =========================
-   ✅ POSTS: UPDATE + DELETE
-   ========================= */
+
 
 export async function updatePost(formData: FormData) {
   const { userId } = await auth();
@@ -92,7 +90,7 @@ export async function updatePost(formData: FormData) {
   const [post] = await db.select().from(posts).where(eq(posts.id, postId));
   if (!post) throw new Error("Post not found.");
 
-  // ✅ owner-only
+  // owner-only
   if (post.authorId !== userId) throw new Error("Not allowed.");
 
   await db
@@ -122,7 +120,7 @@ export async function deletePost(formData: FormData) {
   const [post] = await db.select().from(posts).where(eq(posts.id, postId));
   if (!post) throw new Error("Post not found.");
 
-  // ✅ owner-only
+  // owner-only
   if (post.authorId !== userId) throw new Error("Not allowed.");
 
   await db.delete(posts).where(eq(posts.id, postId));

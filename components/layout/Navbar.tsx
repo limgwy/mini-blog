@@ -12,7 +12,7 @@ import {
 
 const NAV = [
   { label: "Blogs", href: "/blogs" },
-  { label: "Cuisines", href: "/#cuisines" },
+  { label: "Cuisines", href: "/cuisines" },
   { label: "Curated Lists", href: "/lists" },
   { label: "About", href: "/about" },
 ];
@@ -25,19 +25,21 @@ export default function Navbar() {
     const isActive =
       href === "/blogs"
         ? pathname.startsWith("/blogs")
-        : href === "/lists"
-        ? pathname.startsWith("/lists")
-        : href === "/about"
-        ? pathname.startsWith("/about")
-        : false;
+        : href === "/cuisines"
+          ? pathname.startsWith("/cuisines")
+          : href === "/lists"
+            ? pathname.startsWith("/lists")
+            : href === "/about"
+              ? pathname.startsWith("/about")
+              : false;
 
     return [
       "text-sm font-medium transition",
       isHome
         ? "text-white/90 hover:text-white"
         : isActive
-        ? "text-gray-900"
-        : "text-gray-700 hover:text-gray-900",
+          ? "text-gray-900"
+          : "text-gray-700 hover:text-gray-900",
     ].join(" ");
   };
 
@@ -72,13 +74,20 @@ export default function Navbar() {
         {/* CENTER — NAV LINKS */}
         <nav className="hidden items-center gap-8 md:flex">
           {NAV.map((item) => (
-            <Link key={item.label} href={item.href} className={linkClass(item.href)}>
+            <Link
+              key={item.label}
+              href={item.href}
+              className={linkClass(item.href)}
+            >
               {item.label}
               {/* ✅ non-home active underline */}
               {!isHome &&
                 ((item.href === "/blogs" && pathname.startsWith("/blogs")) ||
+                  (item.href === "/cuisines" &&
+                    pathname.startsWith("/cuisines")) ||
                   (item.href === "/lists" && pathname.startsWith("/lists")) ||
-                  (item.href === "/about" && pathname.startsWith("/about"))) && (
+                  (item.href === "/about" &&
+                    pathname.startsWith("/about"))) && (
                   <span className="mt-1 block h-[2px] w-full rounded-full bg-gray-900/80" />
                 )}
             </Link>
@@ -116,17 +125,27 @@ export default function Navbar() {
           </SignedOut>
 
           <SignedIn>
-            <div
-              className={[
-                "rounded-xl border px-2 py-2",
-                isHome
-                  ? "border-white/70 bg-white/10 backdrop-blur"
-                  : "border-black/10 bg-white/70 backdrop-blur",
-              ].join(" ")}
-            >
-              <UserButton afterSignOutUrl="/" />
-            </div>
-          </SignedIn>
+  <div
+    className={[
+      "rounded-xl border px-2 py-2",
+      isHome
+        ? "border-white/70 bg-white/10 backdrop-blur"
+        : "border-black/10 bg-white/70 backdrop-blur",
+    ].join(" ")}
+  >
+    <UserButton afterSignOutUrl="/">
+  <UserButton.MenuItems>
+    <UserButton.Link
+      label="My Posts"
+      href="/my-posts"
+      labelIcon={<span className="text-base">📝</span>}
+    />
+  </UserButton.MenuItems>
+</UserButton>
+
+  </div>
+</SignedIn>
+
         </div>
       </div>
     </header>
